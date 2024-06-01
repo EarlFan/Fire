@@ -1,0 +1,10 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<model>
+	<flowModel name="Fire" numberPhases="3" alphaNull="true"/>
+	<symmetryTerm type="cylindrical">
+		<dataSymCyl radialAxis="Y"/>
+	</symmetryTerm>
+	<CanteraInput  input_file="./libTests/ISBI_axisymmetric/SF6_air.yaml" name = "SF6_air" transport_type = "Mix"/>
+	<additionalPhysic type="viscosity" transport_model="cantera">
+	</additionalPhysic>
+</model>

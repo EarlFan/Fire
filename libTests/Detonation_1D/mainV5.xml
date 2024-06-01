@@ -1,0 +1,18 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<computationParam>
+	<run>Detonation_1D</run>
+	<outputMode format="xml" binary="false" precision="10"/>
+	<timeControlMode iterations="false">
+		<iterations number="5" iterFreq="1"/>
+		<physicalTime totalTime="240.e-6" timeFreq="10.e-6"/>
+	</timeControlMode>
+	<computationControl CFL="0.3"/>
+	<secondOrder>
+		<globalLimiter>vanleer</globalLimiter>
+	</secondOrder>
+	<cut1D>
+		<vertex x="0" y="1e-06" z="1e-6"/>
+		<vecDir x="1" y="0" z="0"/>
+	</cut1D>
+	<restartSimulation restartFileNumber="0" AMRsaveFreq="1"/>
+</computationParam>

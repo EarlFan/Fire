@@ -1,0 +1,54 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<CI>
+    <!-- LIST OF GEOMETRICAL DOMAINS  -->
+    <physicalDomains>
+        <domain name="base" state="chamberLP" type="entireDomain"/>
+       <domain name="HP"  state="shockedState" type="halfSpace">
+            <dataHalfSpace axis="x" origin="0.0273" direction="negative"/>
+        </domain>
+        <domain name="bubble"  state="bubble" type="disc">
+            <dataDisc axis1="x" axis2="y" radius="0.0175">
+                <center x="0.05" y="0." z="0."/>  
+            </dataDisc>
+        </domain> 
+        <!-- <domain name="bubble"  state="bubble" type="halfSpace">
+            <dataHalfSpace axis="x" origin="0.005" direction="positive"/>
+        </domain> -->
+    </physicalDomains>
+
+    <!-- LIST OF BOUNDARY CONDITIONS -->
+    <boundaryConditions>
+        <boundCond name="CLXm" type="inlet" number="1"/>
+        <boundCond name="CLXp" type="nonReflecting" number="2"/>
+        <boundCond name="CLYm" type="symmetry" number="3"/>
+        <boundCond name="CLYp" type="symmetry" number="4"/>
+    </boundaryConditions>
+
+    <!--  LIST OF STATES  -->
+    <!--  293K, 1atm, air -->
+    <state name="chamberLP">
+        <mixture>
+            <dataMix temperature = "293"/>
+            <velocity x="0." y="0." z="0."/>
+            <densityArray N2 = "0.92037971" SF6 = "0." O2 = "0.279593836" />
+        </mixture>
+    </state>
+
+    <!--  Air. M = 1.20 -->
+    <state name="shockedState">
+        <mixture>
+            <dataMix temperature = "330.379600"/>
+            <velocity x="105.067000 " y="0." z="0."/>
+            <densityArray N2 = "1.23506175" SF6 = "0." O2 = "0.37518825" />
+        </mixture>
+    </state>
+
+    <!--  293K, 1atm, SF6/Air  -->
+    <state name="bubble">
+        <mixture>
+            <dataMix temperature = "293"/><!--Switch the entry from P to T-->
+            <velocity x="0." y="0." z="0."/>
+            <densityArray N2 = "0.239296384" SF6 = "4.495388216" O2 = "0.072696738 "/>
+        </mixture>
+    </state>
+</CI>

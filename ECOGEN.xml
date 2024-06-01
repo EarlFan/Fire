@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+<ecogen>
+  <testCase>./libTests/Detonation_1D/</testCase>
+  <!-- <testCase>./libTests/ISBI_axisymmetric/</testCase> -->
+  <!-- <testCase>./libTests/RSBI_2D/</testCase> -->
+  <!-- <testCase>./libTests/Channel_detonation_2D/</testCase> -->
+</ecogen>

@@ -1,0 +1,53 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<CI>
+    <!-- LIST OF GEOMETRICAL DOMAINS  -->
+    <physicalDomains>
+        <domain name="base" state="chamberLP" type="entireDomain"/>
+       <domain name="HP"  state="shockedState" type="halfSpace">
+            <dataHalfSpace axis="x" origin="0.11" direction="negative"/>
+        </domain>
+        <domain name="bubble"  state="bubble" type="disc">
+            <dataDisc axis1="x" axis2="y" radius="0.02">
+                <center x="0.131" y="0." z="0."/>  
+            </dataDisc>
+        </domain> 
+        <!-- <domain name="bubble"  state="bubble" type="halfSpace">
+            <dataHalfSpace axis="x" origin="0.005" direction="positive"/>
+        </domain> -->
+    </physicalDomains>
+
+    <!-- LIST OF BOUNDARY CONDITIONS -->
+    <boundaryConditions>
+        <boundCond name="CLXm" type="nonReflecting" number="1"/>
+        <boundCond name="CLXp" type="nonReflecting" number="2"/>
+        <boundCond name="CLYm" type="symmetry" number="3"/>
+        <boundCond name="CLYp" type="nonReflecting" number="4"/>
+    </boundaryConditions>
+
+    <!--  LIST OF STATES  -->
+    <state name="chamberLP">
+        <mixture>
+            <!-- T = 350K, p = 0.25atm, pure N2.-->
+            <dataMix temperature = "350"/>
+            <velocity x="0" y="0." z="0."/>
+            <densityArray N2 = "0.24385" />
+        </mixture>
+    </state>
+
+    <!-- Ma = 2.30 -->
+    <state name="shockedState">
+        <mixture>
+            <dataMix temperature = "681.380198"/>
+            <velocity x="592.755063" y="0." z="0."/>
+            <densityArray N2 = "0.752181" />
+        </mixture>
+    </state>
+
+    <state name="bubble">
+        <mixture>
+            <dataMix temperature = "350"/><!--Switch the entry from P to T-->
+            <velocity x="0" y="0." z="0."/>
+            <densityArray XE = "0.6356778993890947" O2 = "0.04120316048159187" H2 = "0.005191922715850316"/>
+        </mixture>
+    </state>
+</CI>
