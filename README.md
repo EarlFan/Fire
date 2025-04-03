@@ -27,13 +27,13 @@
 - Linux OS (Ubuntu 20.04/RedHat tested)
 - MPI implementation (OpenMPI recommended)
 - Conda package manager
-- Cantera 3.1.0 with C++ interface
+- Cantera 3.0.0b1 with C++ interface
 
 ### Step-by-Step Setup
 
-1. **Install libcantera-devel 3.1.0**
+1. **Install libcantera-devel 3.0.0b1**
 ```bash
-conda create --name ct --channel cantera/label/dev libcantera-devel=3.1.0
+conda create --name ct --channel cantera/label/dev libcantera-devel==3.0.0b1
 ```
 
 2. **Install MPI (Ubuntu)**
