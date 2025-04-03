@@ -1,0 +1,6 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<model>
+	<CanteraInput  input_file="input_files/SF6_air.yaml" name = "SF6_air" transport_type = "Mix"/>
+		<additionalPhysic type="viscosity">
+	</additionalPhysic>
+</model>

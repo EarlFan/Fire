@@ -1,0 +1,52 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<CI>
+    <!-- LIST OF GEOMETRICAL DOMAINS  -->
+    <physicalDomains>
+        <domain name="base" state="chamberLP" type="entireDomain"/>
+       <domain name="HP"  state="shockedState" type="halfSpace">
+            <dataHalfSpace axis="x" origin="0.005" direction="negative"/>
+        </domain>
+        <domain name="hotspot"  state="bubble" type="rectangle">
+            <dataRectangle axis1="x" axis2="y" lAxis1="0.01" lAxis2="0.014">
+                <posInferiorVertex x="0.008" y="0.023" z="0."/>
+            </dataRectangle>
+        </domain>
+    </physicalDomains>
+
+    <!-- LIST OF BOUNDARY CONDITIONS -->
+    <boundaryConditions>
+        <boundCond name="CLXm" type="symmetry" number="1"/>
+        <boundCond name="CLXp" type="symmetry" number="2"/>
+        <boundCond name="CLYm" type="symmetry" number="3"/>
+        <boundCond name="CLYp" type="symmetry" number="4"/>
+        <boundCond name="CLZm" type="symmetry" number="5"/>
+        <boundCond name="CLZp" type="symmetry" number="6"/>
+    </boundaryConditions>
+
+    <!--  LIST OF STATES  -->
+    <state name="chamberLP">
+        <mixture>
+            <dataMix temperature = "298"/>
+            <velocity x="0." y="0." z="0."/>
+            <densityArray AR = "0.0752818370687744" O2 = "0.00861386812990039" H2 = "0.00108541522281887" H = "0." O = "0." OH = "0." H2O = "0." HO2 = "0." H2O2 = "0."/>
+        </mixture>
+    </state>
+
+    <!-- 1800 K, 12 atm -->
+    <state name="shockedState">
+        <mixture>
+            <dataMix temperature = "1800"/>
+            <velocity x="0." y="0." z="0."/>
+            <densityArray AR = "2.2719877841240232" O2 = "0.25996447386519034" H2 = "0.03275757105520494"/>
+          </mixture>
+    </state>
+
+    <!-- 300 K, 0.4 atm -->
+    <state name="bubble">
+        <mixture>
+            <dataMix temperature = "300"/>
+            <velocity x="0." y="0." z="0."/>
+            <densityArray AR = "0.45439755682480465" O2 = "0.051992894773038076" H2 = "0.006551514211040987"/>
+          </mixture>
+    </state>
+</CI>

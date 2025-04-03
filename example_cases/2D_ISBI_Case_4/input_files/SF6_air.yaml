@@ -1,0 +1,79 @@
+description: |-
+  Generated from file gri30.inp
+  by ck2cti on Mon Aug 25 09:52:57 2003
+
+  Transport data from file ../transport/gri30_tran.dat.
+
+  Edit by FanE for supersonic H2 combustion with AR as inert gas.
+
+generator: cti2yaml
+cantera-version: 2.6.0
+date: Thu, 14 Dec 2023 13:17:50 +0800
+input-files: [SF6_air.cti]
+
+units: {length: cm, quantity: mol, activation-energy: kcal/mol}
+
+phases:
+- name: SF6_air
+  thermo: ideal-gas
+  elements: [O, N, S, F]
+  species: [O2, N2, SF6]
+  kinetics: gas
+  reactions: none
+  state:
+    T: 300.0
+    P: 1.01325e+05
+
+species:
+- name: SF6
+  composition: {S: 1, F: 6}
+  thermo:
+    model: NASA9
+    temperature-ranges: [300.0, 1000.0, 6000.0]
+    data:
+    - [3.30952674e+05, -4737.68505, 22.47738068, 0.01046954309, -2.560641961e-05,
+      2.153716967e-08, -6.51609896e-12, -1.255360583e+05, -109.1760145]
+    - [-7.3067265e+05, -636.705655, 19.47442853, -1.894325671e-04, 4.17872283e-08,
+      -4.78374495e-12, 2.213516129e-16, -1.510609837e+05, -81.47574587]
+  transport:
+    model: gas
+    geometry: linear
+    diameter: 3.8924
+    well-depth: 282.29
+  note: SF6
+- name: N2
+  composition: {N: 2}
+  thermo:
+    model: NASA9
+    temperature-ranges: [300.0, 1000.0, 6000.0]
+    data:
+    - [2.210371497e+04, -381.846182, 6.08273836, -8.53091441e-03, 1.384646189e-05,
+      -9.62579362e-09, 2.519705809e-12, 710.846086, -10.76003744]
+    - [5.87712406e+05, -2239.249073, 6.06694922, -6.1396855e-04, 1.491806679e-07,
+      -1.923105485e-11, 1.061954386e-15, 1.283210415e+04, -15.86640027]
+  transport:
+    model: gas
+    geometry: linear
+    diameter: 3.62
+    well-depth: 97.53
+    polarizability: 1.76
+    rotational-relaxation: 4.0
+  note: '121286'
+- name: O2
+  composition: {O: 2}
+  thermo:
+    model: NASA9
+    temperature-ranges: [200.0, 1000.0, 6000.0]
+    data:
+    - [-3.42556342e+04, 484.700097, 1.119010961, 4.29388924e-03, -6.83630052e-07,
+      -2.0233727e-09, 1.039040018e-12, -3391.45487, 18.4969947]
+    - [-1.037939022e+06, 2344.830282, 1.819732036, 1.267847582e-03, -2.188067988e-07,
+      2.053719572e-11, -8.19346705e-16, -1.689010929e+04, 17.38716506]
+  transport:
+    model: gas
+    geometry: linear
+    diameter: 3.46
+    well-depth: 107.4
+    polarizability: 1.6
+    rotational-relaxation: 3.8
+  note: TPIS89

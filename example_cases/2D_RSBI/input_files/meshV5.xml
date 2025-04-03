@@ -1,0 +1,24 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<mesh>
+        <type structure="cartesian"/>
+        <cartesianMesh>
+                <AMR_Fire xi_diff_lim = "0.05" gradRho_flag = "1" f3 = "0.1" 
+                        YH2O="1" YCO2="0" YOH="0" riemann_type="3" test_prob="3"/>
+		<AMR lvlMax="4" lvlHydro="4" lvlChem="4" T_threshhold="1000"  
+                     varRho="true" varP="true" varT="true"  varU="false" varAlpha="false" criteriaVar="0.05" 
+                     xiSplit="0.05" xiJoin="0.05"/>
+                <dimensions x="0.45" y="0.1" z="1e-5"/>
+                <numberCells x="665" y ="135" z="1"/> 
+		<meshStretching>
+                        <XStretching>
+                                <stretch startAt="0" endAt="0.1" factor="1" numberCells="20"/>
+                                <stretch startAt="0.1" endAt="0.35" factor="1" numberCells="625"/>
+                                <stretch startAt="0.35" endAt="0.45" factor="1" numberCells="20"/>
+                        </XStretching>
+                        <YStretching>
+                                <stretch startAt="0." endAt="0.05" factor="1" numberCells="125"/>
+                                <stretch startAt="0.05" endAt="0.1" factor="1" numberCells="10"/>
+                        </YStretching>
+                </meshStretching>
+        </cartesianMesh>
+</mesh>

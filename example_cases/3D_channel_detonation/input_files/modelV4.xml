@@ -1,0 +1,9 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<model>
+	<CanteraInput  input_file="./input_files/Singh2001_NASA9.yaml" name = "default" transport_type = "Mix"/>
+	<sourceTerms type="reaction">
+	  <reaction reactionFlag="true"/>
+	</sourceTerms>
+	<additionalPhysic type="viscosity">
+	</additionalPhysic>
+</model>

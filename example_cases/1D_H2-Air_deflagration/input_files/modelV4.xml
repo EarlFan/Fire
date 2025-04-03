@@ -1,0 +1,9 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<model>
+	<CanteraInput  input_file="./input_files/Conaire_2004-10.yaml" name = "Conaire_2004" transport_type = "Mix"/>
+	<sourceTerms type="reaction">
+	  <reaction reactionFlag="true"/>
+	</sourceTerms>
+	<additionalPhysic type="viscosity" transport_model="cantera">
+	</additionalPhysic>
+</model>

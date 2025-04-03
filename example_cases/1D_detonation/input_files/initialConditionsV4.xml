@@ -1,0 +1,43 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<CI>
+    <!-- LIST OF GEOMETRICAL DOMAINS  -->
+    <physicalDomains>
+        <domain name="base" state="chamberLP" type="entireDomain"/>
+       <domain name="HP"  state="shockedState" type="halfSpace">
+            <dataHalfSpace axis="x" origin="0.06" direction="negative"/>
+        </domain>
+    </physicalDomains>
+
+    <!-- LIST OF BOUNDARY CONDITIONS -->
+    <boundaryConditions>
+        <boundCond name="CLXm" type="inlet" number="1"/>
+        <boundCond name="CLXp" type="symmetry" number="2"/>
+        <boundCond name="CLYm" type="nonReflecting" number="3"/>
+        <boundCond name="CLYp" type="nonReflecting" number="4"/>
+    </boundaryConditions>
+
+    <!--  LIST OF STATES  -->
+    <state name="chamberLP">
+        <mixture>
+            <dataMix temperature = "378.251986259881"/>
+            <velocity x="0." y="0." z="0."/>
+            <densityArray AR = "0.0637823112012164" O2 = "0.00729807399898631" H2 = "0.000919614799797263" H = "0." O = "0." OH = "0." H2O = "0." HO2 = "0." H2O2 = "0."/>
+        </mixture>
+    </state>
+
+    <state name="shockedState">
+        <mixture>
+            <dataMix temperature = "747.672441027809"/>
+            <velocity x="487.34" y="0." z="0."/>
+            <densityArray AR = "0.160120177078053" O2 = "0.0183212066016218" H2 = "0.00230861632032437" H = "0." O = "0." OH = "0." H2O = "0." HO2 = "0." H2O2 = "0."/>
+          </mixture>
+    </state>
+
+    <state name="bubble">
+        <mixture>
+            <dataMix temperature = "2086"/>
+            <velocity x="0." y="0." z="0."/>
+            <densityArray AR = "0.0752818370687744" O2 = "0.00861386812990039" H2 = "0.00108541522281887" H = "0." O = "0." OH = "0." H2O = "0." HO2 = "0." H2O2 = "0."/>
+          </mixture>
+    </state>
+</CI>

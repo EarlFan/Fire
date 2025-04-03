@@ -1,0 +1,48 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<CI>
+    <!-- LIST OF GEOMETRICAL DOMAINS  -->
+    <physicalDomains>
+        <domain name="base" state="chamberLP" type="entireDomain"/>
+       <domain name="HP"  state="shockedState" type="halfSpace">
+            <dataHalfSpace axis="x" origin="0.15" direction="negative"/>
+        </domain>
+        <domain name="hotspot"  state="bubble" type="rectangle">
+            <dataRectangle axis1="x" axis2="y" lAxis1="0.01" lAxis2="0.014">
+                <posInferiorVertex x="0.137" y="0.023" z="0."/>
+            </dataRectangle>
+        </domain>
+    </physicalDomains>
+
+    <!-- LIST OF BOUNDARY CONDITIONS -->
+    <boundaryConditions>
+        <boundCond name="CLXm" type="symmetry" number="1"/>
+        <boundCond name="CLXp" type="symmetry" number="2"/>
+        <boundCond name="CLYm" type="symmetry" number="3"/>
+        <boundCond name="CLYp" type="symmetry" number="4"/>
+    </boundaryConditions>
+
+    <!--  LIST OF STATES  -->
+    <state name="chamberLP">
+        <mixture>
+            <dataMix temperature = "298"/>
+            <velocity x="0." y="0." z="0."/>
+            <densityArray AR = "0.0752818370687744" O2 = "0.00861386812990039" H2 = "0.00108541522281887" H = "0." O = "0." OH = "0." H2O = "0." HO2 = "0." H2O2 = "0."/>
+        </mixture>
+    </state>
+
+    <state name="shockedState">
+        <mixture>
+            <dataMix temperature = "2798.938"/>
+            <velocity x="0." y="0." z="0."/>
+            <densityArray AR = "0.9" O2 = "0.001647079" H2 = "0.0002943294" H = "0.00006538974" O = "0.0004076938" OH = "0.001699713" H2O = "0.01325487" HO2 = "0.0000006338685" H2O2 = "0.00000003427736"/>
+          </mixture>
+    </state>
+
+    <state name="bubble">
+        <mixture>
+            <dataMix temperature = "2086"/>
+            <velocity x="0." y="0." z="0."/>
+            <densityArray AR = "0.0752818370687744" O2 = "0.00861386812990039" H2 = "0.00108541522281887" H = "0." O = "0." OH = "0." H2O = "0." HO2 = "0." H2O2 = "0."/>
+          </mixture>
+    </state>
+</CI>
