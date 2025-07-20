@@ -43,7 +43,7 @@
 #include <math.h>
 #include "../../../include/Fire.h"
 
-enum Variable { transport, pressure, density, alpha, velocityMag, velocityU, velocityV, velocityW, temperature, QPA, transportArray, massFraction, inductionTime, Y_OH, div_vor_v, gradRhoAMR};
+enum Variable { transport, pressure, density, alpha, velocityMag, velocityU, velocityV, velocityW, temperature, QPA, transportArray, massFraction, inductionTime, Y_OH, div_vor_v, gradRhoAMR, molarFraction};
 
 class Cell; //Predeclaration of class to include following .h
 
@@ -121,6 +121,7 @@ class Cell
         Coord computeGradient(Variable nameVariable, int num = -1);
         void computeGradient(std::vector<Coord> &grads, std::vector<Variable> &nameVariables, std::vector<int> &numPhases);
         void computeRhoIGradient(std::vector<Coord> &grads);
+        void computeXGradient(std::vector<Coord> &grads);
         void computeTransportProperties();
        
         const QuantitiesAddPhys* getQPA(int &numQPA) const { return m_vecQuantitiesAddPhys[numQPA]; }; //!< Allow to recover an additional physical quantity

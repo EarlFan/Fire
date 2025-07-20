@@ -507,6 +507,17 @@ double Cell::selectScalar(Variable nameVariable, int num) const
       return m_mixture->getInductionTime();
     }
     break;
+  case molarFraction:
+    if(m_model->whoAmI()!="FIRE")
+    {
+      printf("The molarFraction entry in Cell::selectScalar( isn't suitable for non-FIRE model.\n");
+      exit(EXIT_FAILURE);
+    }
+    else
+    {
+      return m_mixture->getMolarFractionArray()[num];
+    }
+    break;
   default:
     Errors::errorMessage("nameVariable unknown in selectScalar (linked to QuantitiesAddPhys)"); return 0;
     break;

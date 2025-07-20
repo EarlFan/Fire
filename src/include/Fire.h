@@ -71,6 +71,7 @@ public:
 	static int g_lvlmax;
 	static int riemann_type;
 	static int test_prob;
+	static int species_diffusion_type;
 };
 
 using namespace std;

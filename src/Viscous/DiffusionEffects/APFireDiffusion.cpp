@@ -67,15 +67,19 @@ void APFireDiffusion::addQuantityAddPhys(Cell *cell)
 
 void APFireDiffusion::solveFluxAddPhys(CellInterface *cellInterface, const int &numberPhases)
 {
-  double T_face;
+  double T_face, p_face;
   // Copy velocities and gradients of left and right cells
   // pointer shall be used for efficiency. - fnae
   m_velocityLeft = cellInterface->getCellGauche()->getMixture()->getVelocity();
   m_velocityRight = cellInterface->getCellDroite()->getMixture()->getVelocity();
   m_rhoArrayL = cellInterface->getCellGauche()->getMixture()->getDensityArray();
   m_rhoArrayR = cellInterface->getCellDroite()->getMixture()->getDensityArray();
+  m_XArrayL = cellInterface->getCellGauche()->getMixture()->getMolarFractionArray();
+  m_XArrayR = cellInterface->getCellDroite()->getMixture()->getMolarFractionArray();
   m_TemperatureL = cellInterface->getCellGauche()->getMixture()->getTemperature();
   m_TemperatureR = cellInterface->getCellDroite()->getMixture()->getTemperature();
+  m_pressureL = cellInterface->getCellGauche()->getMixture()->getPressure();
+  m_pressureR = cellInterface->getCellDroite()->getMixture()->getPressure();
 
   double distanceX = std::fabs(cellInterface->getCellGauche()->distanceX(cellInterface->getCellDroite()));
   double distanceY = std::fabs(cellInterface->getCellGauche()->distanceY(cellInterface->getCellDroite()));
@@ -87,6 +91,7 @@ void APFireDiffusion::solveFluxAddPhys(CellInterface *cellInterface, const int &
   m_binormal = cellInterface->getFace()->getBinormal();
 
   T_face = 0.5*(m_TemperatureL+m_TemperatureR); // a better linear interpolation shall be used. - fnae
+  p_face = 0.5*(m_pressureL+m_pressureR); // a better linear interpolation shall be used. - fnae
 
   m_gradULeft = cellInterface->getCellGauche()->getQPA(m_numQPA)->getGradVT(1);
   m_gradURight = cellInterface->getCellDroite()->getQPA(m_numQPA)->getGradVT(1);
@@ -98,14 +103,24 @@ void APFireDiffusion::solveFluxAddPhys(CellInterface *cellInterface, const int &
   m_gradTLeft = cellInterface->getCellGauche()->getQPA(m_numQPA)->getGradVT(4);
   m_gradTRight = cellInterface->getCellDroite()->getQPA(m_numQPA)->getGradVT(4);
 
+  m_gradPLeft = cellInterface->getCellGauche()->getQPA(m_numQPA)->getGradVT(5);
+  m_gradPRight = cellInterface->getCellDroite()->getQPA(m_numQPA)->getGradVT(5);
+
   for(int k = 0 ;k < NS; k++)
   {
     m_gradRhoLeft[k] = cellInterface->getCellGauche()->getQPA(m_numQPA)->getGradRhoI(k+1);
     m_gradRhoRight[k] = cellInterface->getCellDroite()->getQPA(m_numQPA)->getGradRhoI(k+1);
   }
 
-  Coord S, dTds, correct, gradT_f, gradU_f, gradV_f, gradW_f;
+  for(int k = 0 ;k < NS; k++)
+  {
+    m_gradXLeft[k] = cellInterface->getCellGauche()->getQPA(m_numQPA)->getGradXI(k+1);
+    m_gradXRight[k] = cellInterface->getCellDroite()->getQPA(m_numQPA)->getGradXI(k+1);
+  }
+
+  Coord S, dTds, correct, gradT_f, gradU_f, gradV_f, gradW_f, gradP_f;
   std::array<Coord,NS> gradRho_f;
+  std::array<Coord,NS> gradX_f;
 
   double term1, term2;
 
@@ -118,6 +133,11 @@ void APFireDiffusion::solveFluxAddPhys(CellInterface *cellInterface, const int &
   term1 = (m_TemperatureR - m_TemperatureL)/distance;
   term2 = gradT_f.getX()*S.getX() + gradT_f.getY()*S.getY() + gradT_f.getZ()*S.getZ();
   gradT_f += (term1 - term2)*S;
+
+  gradP_f = 0.5* (m_gradPLeft + m_gradPRight);
+  term1 = (m_pressureR - m_pressureL)/distance;
+  term2 = gradP_f.getX()*S.getX() + gradP_f.getY()*S.getY() + gradP_f.getZ()*S.getZ();
+  gradP_f += (term1 - term2)*S;
 
   gradU_f = 0.5* (m_gradULeft + m_gradURight);
   term1 = (m_velocityRight.getX() - m_velocityLeft.getX())/distance;
@@ -146,12 +166,22 @@ void APFireDiffusion::solveFluxAddPhys(CellInterface *cellInterface, const int &
     gradRho_f[i] += (term1 - term2)*S; 
   }
 
+  for(int i=0;i<NS;i++)
+  {
+    gradX_f[i] = 0.5* (m_gradXLeft[i] + m_gradXRight[i]);
+    term1 = (m_XArrayR[i] - m_XArrayL[i])/distance;
+    term2 = gradX_f[i].getX()*S.getX() + gradX_f[i].getY()*S.getY() + gradX_f[i].getZ()*S.getZ();
+    gradX_f[i] += (term1 - term2)*S; 
+  }
+
   gradT_f.localProjection(m_normal, m_tangent, m_binormal);
   gradU_f.localProjection(m_normal, m_tangent, m_binormal);
   gradV_f.localProjection(m_normal, m_tangent, m_binormal);
   gradW_f.localProjection(m_normal, m_tangent, m_binormal);
-  for(int i=0;i<NS;i++)
-  {gradRho_f[i].localProjection(m_normal, m_tangent, m_binormal);}
+  for(int i=0;i<NS;i++){
+    gradRho_f[i].localProjection(m_normal, m_tangent, m_binormal);
+    gradX_f[i].localProjection(m_normal, m_tangent, m_binormal);
+  }
 
   // // Compute the mixture mu on left and right
   // double muMixLeft(0.), muMixRight(0.);
@@ -188,15 +218,10 @@ void APFireDiffusion::solveFluxAddPhys(CellInterface *cellInterface, const int &
     m_gradRhoRight[k].localProjection(m_normal, m_tangent, m_binormal);
   }
 
-  // this->solveFluxViscosityInner(m_velocityLeft, m_velocityRight, 
-  //   m_rhoArrayL, m_rhoArrayR, m_gradULeft, m_gradURight,
-  //   m_gradVLeft, m_gradVRight, m_gradWLeft, m_gradWRight, m_gradTLeft, m_gradTRight,
-  //   m_gradRhoLeft, m_gradRhoRight, m_trans,T_face, numberPhases);
-
   this->solveFluxViscosityInner(m_velocityLeft, m_velocityRight, 
-    m_rhoArrayL, m_rhoArrayR, gradU_f, gradU_f,
-    gradV_f, gradV_f, gradW_f, gradW_f, gradT_f, gradT_f,
-    gradRho_f, gradRho_f, m_trans,T_face, numberPhases, cellInterface);
+    m_rhoArrayL, m_rhoArrayR, m_XArrayL, m_XArrayR, gradU_f, gradU_f,
+    gradV_f, gradV_f, gradW_f, gradW_f, gradT_f, gradT_f, gradP_f, gradP_f,
+    gradRho_f, gradRho_f, gradX_f, gradX_f, m_trans,T_face, p_face, numberPhases, cellInterface);
 
   // Flux projection on the absolute orientation axes - fane
   cellInterface->getMod()->reverseProjection(m_normal, m_tangent, m_binormal);
@@ -215,21 +240,25 @@ void APFireDiffusion::solveFluxAddPhys(CellInterface *cellInterface, const int &
 
 void APFireDiffusion::solveFluxAddPhysBoundary(CellInterface *cellInterface, const int &numberPhases)
 {
-  double T_face;
+  double T_face, p_face;
   double term1, term2;
   ////KS//DEV// BC Injection, Tank, Outflow to do
 
   // Copy velocities and gradients of left and right cells
   m_velocityLeft = cellInterface->getCellGauche()->getMixture()->getVelocity();
   m_rhoArrayL = cellInterface->getCellGauche()->getMixture()->getDensityArray();
+  m_XArrayL = cellInterface->getCellGauche()->getMixture()->getMolarFractionArray();
   m_TemperatureL = cellInterface->getCellGauche()->getMixture()->getTemperature();
+  m_pressureL = cellInterface->getCellGauche()->getMixture()->getPressure();
 
   T_face = m_TemperatureL;
+  p_face = m_pressureL;
 
   m_gradULeft = cellInterface->getCellGauche()->getQPA(m_numQPA)->getGradVT(1);
   m_gradVLeft = cellInterface->getCellGauche()->getQPA(m_numQPA)->getGradVT(2);
   m_gradWLeft = cellInterface->getCellGauche()->getQPA(m_numQPA)->getGradVT(3);
   m_gradTLeft = cellInterface->getCellGauche()->getQPA(m_numQPA)->getGradVT(4);
+  m_gradPLeft = cellInterface->getCellGauche()->getQPA(m_numQPA)->getGradVT(5);
 
   for(int k = 0 ;k < NS; k++)
   {
@@ -274,8 +303,9 @@ void APFireDiffusion::solveFluxAddPhysBoundary(CellInterface *cellInterface, con
     // initialize ghost cell velocity by reverse normal velocity, not this is in local coordinate
     Coord velocity_ghost = m_velocityLeft;
 
-    Coord gradU_f,gradV_f, gradW_f, gradT_f, S;
+    Coord gradU_f,gradV_f, gradW_f, gradT_f, S, gradP_f;
     std::array<Coord,NS> gradRho_f;
+    std::array<Coord,NS> gradX_f;
 
   // gradT_f = 0.5* (m_gradTLeft + m_gradTRight);
   // term1 = (m_TemperatureR - m_TemperatureL)/distance;
@@ -294,15 +324,22 @@ void APFireDiffusion::solveFluxAddPhysBoundary(CellInterface *cellInterface, con
 
     gradT_f = 0; // same value for left/ghost cell
 
+    gradP_f = 0; // same value for left/ghost cell
+
     for(int i=0;i<NS;i++)
     {
       gradRho_f[i] = 0;
     }
 
+    // this->solveFluxViscosityInner(m_velocityLeft, velocity_ghost, 
+    //   m_rhoArrayL, m_rhoArrayL, gradU_f, gradU_f,
+    //   gradV_f, gradV_f, gradW_f, gradW_f, gradT_f, gradT_f,
+    //   gradRho_f, gradRho_f, m_trans,T_face, numberPhases,cellInterface);  
+
     this->solveFluxViscosityInner(m_velocityLeft, velocity_ghost, 
-      m_rhoArrayL, m_rhoArrayL, gradU_f, gradU_f,
-      gradV_f, gradV_f, gradW_f, gradW_f, gradT_f, gradT_f,
-      gradRho_f, gradRho_f, m_trans,T_face, numberPhases,cellInterface);  
+      m_rhoArrayL, m_rhoArrayL, m_XArrayL, m_XArrayL, gradU_f, gradU_f,
+      gradV_f, gradV_f, gradW_f, gradW_f, gradT_f, gradT_f, gradP_f, gradP_f,
+      gradRho_f, gradRho_f, gradX_f, gradX_f, m_trans,T_face, p_face, numberPhases, cellInterface);
 
   }
   else if(typeCellInterface == 9)
@@ -318,14 +355,15 @@ void APFireDiffusion::solveFluxAddPhysBoundary(CellInterface *cellInterface, con
     this->solveFluxViscosityNonReflecting(m_velocityLeft, m_rhoArrayL, m_gradULeft, m_gradVLeft, m_gradWLeft, m_gradTLeft, m_gradRhoLeft, 
       m_trans, T_face, numberPhases,cellInterface);
   }
-  else if (typeCellInterface == 2)//wall, fix later - fane
+  else if (typeCellInterface == 2)
   {
     // initialize ghost cell velocity by reverse normal velocity, not this is in local coordinate
     Coord velocity_ghost = m_velocityLeft;
     velocity_ghost.setX(-velocity_ghost.getX());
 
-    Coord gradU_f,gradV_f, gradW_f, gradT_f, S;
+    Coord gradU_f,gradV_f, gradW_f, gradT_f, S, gradP_f;
     std::array<Coord,NS> gradRho_f;
+    std::array<Coord,NS> gradX_f;
 
   // gradT_f = 0.5* (m_gradTLeft + m_gradTRight);
   // term1 = (m_TemperatureR - m_TemperatureL)/distance;
@@ -352,6 +390,11 @@ void APFireDiffusion::solveFluxAddPhysBoundary(CellInterface *cellInterface, con
     term2 = gradT_f.getX()*S.getX() + gradT_f.getY()*S.getY() + gradT_f.getZ()*S.getZ();
     gradT_f += (term1 - term2)*S; 
 
+    gradP_f = 0; // same value for left/ghost cell
+    term1 = 0; //cancelled
+    term2 = gradP_f.getX()*S.getX() + gradP_f.getY()*S.getY() + gradP_f.getZ()*S.getZ();
+    gradT_f += (term1 - term2)*S; 
+
     for(int i=0;i<NS;i++)
     {
       gradRho_f[i] = 0;
@@ -360,16 +403,30 @@ void APFireDiffusion::solveFluxAddPhysBoundary(CellInterface *cellInterface, con
       gradRho_f[i] += (term1 - term2)*S; // correction
     }
 
+    for(int i=0;i<NS;i++)
+    {
+      gradX_f[i] = 0;
+      term1 = 0; //cancelled
+      term2 = gradX_f[i].getX()*S.getX() + gradX_f[i].getY()*S.getY() + gradX_f[i].getZ()*S.getZ();
+      gradX_f[i] += (term1 - term2)*S; // correction
+    }
+
   // printf("gradU_f.x = %le, gradU_f.Y = %le, gradU_f.Z = %le.\n", gradU_f.getX(), gradU_f.getY(), gradU_f.getZ());
   // printf("gradV_f.x = %le, gradV_f.Y = %le, gradV_f.Z = %le.\n", gradV_f.getX(), gradV_f.getY(), gradV_f.getZ());
   // printf("gradUR.x = %le, gradUR.Y = %le, gradUR.Z = %le.\n", m_gradURight.getX(), m_gradURight.getY(), m_gradURight.getZ());
   // printf("avg.x = %le, avg.Y = %le, avg.Z = %le, term1 = %le, term2 = %le.\n", gradU_f.getX(), gradU_f.getY(), gradU_f.getZ(), term1, term2);
   // printf("In term2, UR = %le, UL = %le.\n", m_velocityRight.getX(), m_velocityLeft.getX());
 
+    // this->solveFluxViscosityInner(m_velocityLeft, velocity_ghost, 
+    //   m_rhoArrayL, m_rhoArrayL, gradU_f, gradU_f,
+    //   gradV_f, gradV_f, gradW_f, gradW_f, gradT_f, gradT_f,
+    //   gradRho_f, gradRho_f, m_trans,T_face, numberPhases,cellInterface);
+      
     this->solveFluxViscosityInner(m_velocityLeft, velocity_ghost, 
-      m_rhoArrayL, m_rhoArrayL, gradU_f, gradU_f,
-      gradV_f, gradV_f, gradW_f, gradW_f, gradT_f, gradT_f,
-      gradRho_f, gradRho_f, m_trans,T_face, numberPhases,cellInterface);  
+      m_rhoArrayL, m_rhoArrayL, m_XArrayL, m_XArrayL, gradU_f, gradU_f,
+      gradV_f, gradV_f, gradW_f, gradW_f, gradT_f, gradT_f, gradP_f, gradP_f,
+      gradRho_f, gradRho_f, gradX_f, gradX_f, m_trans,T_face,p_face, numberPhases, cellInterface);
+
 
   // printf("dudx = %le, dudy = %le, dvdx = %le, dvdy = %le, dTdx = %le, u = %le, v = %le.\n",dudx,dudy,dvdx,dvdy, dTdx, u,v);
     // printf("fluxBuff[0] = %le, fluxBuff[1] = %le, [2] = %le, [u] = %le, [v] = %le, [E] = %le.\n",
@@ -396,8 +453,9 @@ void APFireDiffusion::solveFluxAddPhysBoundary(CellInterface *cellInterface, con
     Coord velocity_ghost = m_velocityLeft;
     velocity_ghost.setX(-velocity_ghost.getX());
 
-    Coord gradU_f,gradV_f, gradW_f, gradT_f, S;
+    Coord gradU_f,gradV_f, gradW_f, gradT_f, S, gradP_f;
     std::array<Coord,NS> gradRho_f;
+    std::array<Coord,NS> gradX_f;
 
     S.setX(distanceX/distLeft);
     S.setY(distanceY/distLeft);
@@ -420,9 +478,12 @@ void APFireDiffusion::solveFluxAddPhysBoundary(CellInterface *cellInterface, con
 
     gradT_f = 0; // same value for left/ghost cell
 
+    gradP_f = 0; // same value for left/ghost cell
+
     for(int i=0;i<NS;i++)
     {
       gradRho_f[i] = 0;
+      gradX_f[i] = 0;
     }
 
   // printf("gradU_f.x = %le, gradU_f.Y = %le, gradU_f.Z = %le.\n", gradU_f.getX(), gradU_f.getY(), gradU_f.getZ());
@@ -431,15 +492,15 @@ void APFireDiffusion::solveFluxAddPhysBoundary(CellInterface *cellInterface, con
   // printf("avg.x = %le, avg.Y = %le, avg.Z = %le, term1 = %le, term2 = %le.\n", gradU_f.getX(), gradU_f.getY(), gradU_f.getZ(), term1, term2);
   // printf("In term2, UR = %le, UL = %le.\n", m_velocityRight.getX(), m_velocityLeft.getX());
 
-    this->solveFluxViscosityInner(m_velocityLeft, velocity_ghost, 
-      m_rhoArrayL, m_rhoArrayL, gradU_f, gradU_f,
-      gradV_f, gradV_f, gradW_f, gradW_f, gradT_f, gradT_f,
-      gradRho_f, gradRho_f, m_trans,T_face, numberPhases,cellInterface);  
+    // this->solveFluxViscosityInner(m_velocityLeft, velocity_ghost, 
+    //   m_rhoArrayL, m_rhoArrayL, gradU_f, gradU_f,
+    //   gradV_f, gradV_f, gradW_f, gradW_f, gradT_f, gradT_f,
+    //   gradRho_f, gradRho_f, m_trans,T_face, numberPhases,cellInterface);  
 
-    // 1 side method
-    // this->solveFluxViscositySymmetry(m_velocityLeft, 
-    //   m_rhoArrayL, m_gradULeft, m_gradVLeft, m_gradWLeft, m_gradTLeft,
-    //   m_gradRhoLeft, m_trans,T_face, numberPhases,cellInterface);  
+    this->solveFluxViscosityInner(m_velocityLeft, velocity_ghost, 
+      m_rhoArrayL, m_rhoArrayL, m_XArrayL, m_XArrayL, gradU_f, gradU_f,
+      gradV_f, gradV_f, gradW_f, gradW_f, gradT_f, gradT_f, gradP_f, gradP_f,
+      gradRho_f, gradRho_f, gradX_f, gradX_f, m_trans,T_face,p_face, numberPhases, cellInterface);
   }
   else { 
     printf("Viscous B.C. is not managed.\n");
@@ -460,13 +521,18 @@ void APFireDiffusion::solveFluxAddPhysBoundary(CellInterface *cellInterface, con
 }
 
 //***********************************************************************
-
 void APFireDiffusion::solveFluxViscosityInner(Coord &velocityLeft, Coord &velocityRight, 
       std::array<double,NS> &rhoArrayL, std::array<double,NS> &rhoArrayR, 
+      std::array<double,NS> &XArrayL, std::array<double,NS> &XArrayR, 
       Coord &gradULeft, Coord &gradURight, 
-      Coord &gradVLeft, Coord &gradVRight, Coord &gradWLeft, Coord &gradWRight, 
-      Coord &gradTLeft, Coord &gradTRight, std::array<Coord,NS> &gradRhoLeft, 
-      std::array<Coord,NS> &gradRhoRight, std::array<double,NS+2> &trans, double T_face, int numberPhases, CellInterface *cellInterface) const
+      Coord &gradVLeft, Coord &gradVRight, 
+      Coord &gradWLeft, Coord &gradWRight, 
+      Coord &gradTLeft, Coord &gradTRight, 
+      Coord &gradPLeft, Coord &gradPRight, 
+      std::array<Coord,NS> &gradRhoLeft, std::array<Coord,NS> &gradRhoRight, 
+      std::array<Coord,NS> &gradXLeft, std::array<Coord,NS> &gradXRight, 
+      std::array<double,NS+2> &trans, double T_face, double P_face, 
+      int numberPhases, CellInterface *cellInterface) const
 {
   // cout<<"In solveFluxViscosityInner, cellInterface cellInterface->getCellGauche()->x = "<<
   //   cellInterface->getCellGauche()->getPosition().getX()<<endl;
@@ -488,7 +554,7 @@ void APFireDiffusion::solveFluxViscosityInner(Coord &velocityLeft, Coord &veloci
 	//Extraction of data
 	double uL, vL, wL, uR, vR, wR;
 	double dudxL, dudyL, dudzL, dudxR, dudyR, dudzR;
-  double dTdx;
+  double dTdx, dPdx;
   double dvdxL, dvdyL, dvdxR, dvdyR;
   double dwdxL, dwdzL, dwdxR, dwdzR;
   double drdxL[NS], drdyL[NS], drdzL[NS];
@@ -520,6 +586,7 @@ void APFireDiffusion::solveFluxViscosityInner(Coord &velocityLeft, Coord &veloci
   dwdzR = gradWRight.getZ();
 
   dTdx = 0.5*(gradTLeft.getX()+gradTRight.getX());
+  dPdx = 0.5*(gradPLeft.getX()+gradPRight.getX());
 
   for(int i=0;i<NS;i++)
   {
@@ -554,21 +621,57 @@ void APFireDiffusion::solveFluxViscosityInner(Coord &velocityLeft, Coord &veloci
   double rhoMixL(0.), rhoMixR(0.), YsL[NS], YsR[NS],YsM[NS];
   for(int i=0;i<NS;i++){rhoMixL+=rhoArrayL[i];rhoMixR+=rhoArrayR[i];}
   for(int i=0;i<NS;i++){YsM[i] = 0.5*(rhoArrayL[i]/rhoMixL + rhoArrayR[i]/rhoMixR);}
-  
+
   double JAX[NS],JA(0.), thermo[5], JSX[NS];
-  for(int i=0;i<NS;i++)
+
+  if (AMRPara::species_diffusion_type == 0) // Fick's law diffusion with the conservation-maintaining correction
   {
-    JAX[i] = DC[i]*(drdx[i] - YsM[i]*drhoMixdx); // notes that rho gradient isn't 0
-    JA+=JAX[i];
+    for(int i=0;i<NS;i++)
+    {
+      JAX[i] = DC[i]*(drdx[i] - YsM[i]*drhoMixdx); // notes that rho gradient isn't 0
+      JA+=JAX[i];
+    }
+
+    for(int i=0;i<NS;i++)JSX[i] = -JAX[i]+YsM[i]*JA;
   }
+  else if (AMRPara::species_diffusion_type == 1) // pressure dependent species diffusion
+  {
+    double XsM[NS];
+    double dXdx[NS];
+    double rhosM[NS];
 
-  // for(int i=0;i<NS;i++)
-  // {
-  //   JAX[i] = DC[i]*drdx[i];
-  //   JA+=JAX[i];
-  // }
+    // face averaged molar fraction
+    for(int i=0;i<NS;i++)
+    {
+      XsM[i] = 0.5*(XArrayL[i] + XArrayR[i]);
+      rhosM[i] = 0.5*(rhoArrayL[i] + rhoArrayR[i]);
+    }
 
-  for(int i=0;i<NS;i++)JSX[i] = -JAX[i]+YsM[i]*JA;
+    // face averaged molar fraction gradient
+    for(int i=0;i<NS;i++)
+    {
+      dXdx[i] = 0.5*(gradXLeft[i].getX()+gradXRight[i].getX());
+    }
+
+    for(int i=0;i<NS;i++)
+    {
+      if(XsM[i] > 1e-15)
+      {
+        JSX[i] = - rhosM[i]*DC[i]*(dXdx[i] + (XsM[i]-YsM[i])*dPdx/P_face)/XsM[i];
+      }
+      else
+      {
+        JSX[i] = 0.0; // avoid division by zero
+      }
+      // JSX[i] = - rhosM[i]*DC[i]*(dXdx[i] + (XsM[i]-YsM[i])*dPdx/P_face)/XsM[i];
+    }
+  }
+  else
+  {
+    printf("Species diffusion type %d is not supported.\n", AMRPara::species_diffusion_type);
+    exit(EXIT_FAILURE);
+  }
+  
 	//Writing of viscous terms on each equation of fluxBuffFire
 	for (int i = 0; i<NS; i++)
 	{
@@ -644,11 +747,6 @@ void APFireDiffusion::solveFluxViscosityNonReflecting(Coord &velocityLeft,
       Coord &gradTLeft, std::array<Coord,NS> &gradRhoLeft,
       std::array<double,NS+2> &trans, double T_face, int numberPhases, CellInterface *cellInterface) const
 {
-  // this->solveFluxViscosityInner(velocityLeft, velocityLeft, 
-  //   rhoArrayL, rhoArrayL, gradULeft, gradULeft,
-  //   gradVLeft, gradVLeft, gradWLeft, gradWLeft, gradTLeft, gradTLeft,
-  //   gradRhoLeft, gradRhoLeft, trans,T_face, numberPhases,cellInterface);
-
   std::array<double,NS> rhoArrayR = rhoArrayL;
   Coord velocityRight = velocityLeft;
   Coord gradURight = gradULeft;
@@ -656,16 +754,6 @@ void APFireDiffusion::solveFluxViscosityNonReflecting(Coord &velocityLeft,
   Coord gradWRight = gradWLeft;
   Coord gradTRight = gradTLeft;
   std::array<Coord,NS> gradRhoRight = gradRhoLeft;
-
-    // cout<<"In solveFluxViscosityInner, cellInterface cellInterface->getCellGauche()->x = "<<
-  //   cellInterface->getCellGauche()->getPosition().getX()<<endl;
-
-  // string a = cellInterface->getCellGauche()->getSymType();
-  // cout<<"a = "<<a<<endl;
-
-  // cout<<"In solveFluxViscosityInner, cellInterface cellInterface->getCellGauche()->getSymType()"<<
-  //   cellInterface->getCellGauche()->getSymType()<<endl;
-  
 
   double muMix, kMix, DC[NS];
   muMix = trans[0];// mu_mix
@@ -1080,7 +1168,7 @@ void APFireDiffusion::addSymmetricTermsRadialAxisOnY(Cell *cell, const int &numb
 
 void APFireDiffusion::communicationsAddPhys(int numberPhases, const int &dim, const int &lvl)
 {
-  for(int i=1;i<=NS+4;i++)//1:U, 2:V, 3:W, 4:T, 5->NS+4:species
+  for(int i=1;i<=NS+5+NS;i++)//1:U, 2:V, 3:W, 4:T, 5:p, 6->NS+6:rho_i, NS+7->2NS+6: X_i(molar fraction)
   {
     parallel.communicationsVector(QPA, dim, lvl, m_numQPA, i); //m_grad_i
   }

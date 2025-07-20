@@ -55,6 +55,7 @@ int AMRPara::chem_step_gap = 1;
 int AMRPara::g_lvlmax = -1;
 int AMRPara::riemann_type = -1;
 int AMRPara::test_prob = -1;
+int AMRPara::species_diffusion_type = 0; // Default value, can be set based on the problem requirements
 
 // return summation of NS elements
 double sumNS(double *arr)
@@ -83,6 +84,10 @@ void transport_model(double Ys[NS],double T,double P,double rhoMix,double trans[
 	sol->transport()->getMixDiffCoeffs(diff_coef_temp);
 	for(int i=0;i<NS;i++)
 	{
+		if(AMRPara::species_diffusion_type == 1) // consider the pressure effect
+		{
+			diff_coef_temp[i] *= 101325/P;
+		}
 		trans[i+2] = diff_coef_temp[i];
 	}     
 }

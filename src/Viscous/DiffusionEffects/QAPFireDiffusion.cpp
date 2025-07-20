@@ -38,11 +38,11 @@ QAPFireDiffusion::QAPFireDiffusion(){}
 
 //***********************************************************************
 
-QAPFireDiffusion::QAPFireDiffusion(AddPhys* addPhys) : QuantitiesAddPhys(addPhys), m_gradsVT(4),m_gradsRhoI(NS)
+QAPFireDiffusion::QAPFireDiffusion(AddPhys* addPhys) : QuantitiesAddPhys(addPhys), m_gradsVT(5),m_gradsRhoI(NS),m_gradsX(NS)
 {
-  variableNamesVisc.resize(4);
-  numPhasesVisc.resize(4);//-fane
-  for (int i = 0; i < 4; ++i) {
+  variableNamesVisc.resize(5);
+  numPhasesVisc.resize(5);//-fane
+  for (int i = 0; i < 5; ++i) {
     m_gradsVT[i] = 0.;
     numPhasesVisc[i] = -1;//since the mixture variables are used for gradient evaluation, -1 is used for species index.
   }
@@ -51,6 +51,7 @@ QAPFireDiffusion::QAPFireDiffusion(AddPhys* addPhys) : QuantitiesAddPhys(addPhys
   variableNamesVisc[1] = velocityV;
   variableNamesVisc[2] = velocityW;
   variableNamesVisc[3] = temperature;
+  variableNamesVisc[4] = pressure;
 }
 
 //***********************************************************************
@@ -68,19 +69,24 @@ void QAPFireDiffusion::computeQuantities(Cell* cell)
   //   printf("m_gradsVT[%d], .x = %le, .y = %le.\n",i,m_gradsVT[i].getX(),m_gradsVT[i].getY());
   // }
   cell->computeRhoIGradient(m_gradsRhoI);
+  cell->computeXGradient(m_gradsX);
 }
 
 //***********************************************************************
 
-void QAPFireDiffusion::setGrad(const Coord &grad, int num)//1:U, 2:V, 3:W, 4:T, 5->NS+4:species
+void QAPFireDiffusion::setGrad(const Coord &grad, int num)//1:U, 2:V, 3:W, 4:T, 5:p, 6->NS+6:species
 {
-  if(num<=4)
+  if(num<=5)
   {
     m_gradsVT[num-1] = grad;
   }
-  else if(num>4 && num<=NS+4)
+  else if(num>5 && num<=NS+5)
   {
-    m_gradsRhoI[num-5] = grad;
+    m_gradsRhoI[num-6] = grad;
+  }
+  else if(num>NS+5 && num<=NS+5+NS)
+  {
+    m_gradsX[num-NS-6] = grad;
   }
   else
   {
@@ -93,13 +99,17 @@ void QAPFireDiffusion::setGrad(const Coord &grad, int num)//1:U, 2:V, 3:W, 4:T, 
 
 const Coord& QAPFireDiffusion::getGrad(int num) const //1:U, 2:V, 3:W, 4:T, 5->NS+4:species
 {
-  if(num<=4)
+  if(num<=5)
   {
     return m_gradsVT[num-1];
   }
-  else if(num>4 && num<=NS+4)
+  else if(num>5 && num<=NS+5)
   {
-    return m_gradsRhoI[num-5];
+    return m_gradsRhoI[num-6];
+  }
+  else if(num>NS+5 && num<=NS+5+NS)
+  {
+    return m_gradsX[num-NS-6];
   }
   else
   {

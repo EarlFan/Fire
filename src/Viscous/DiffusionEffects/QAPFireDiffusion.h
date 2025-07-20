@@ -51,12 +51,14 @@ class QAPFireDiffusion : public QuantitiesAddPhys
     virtual const Coord& getGrad(int num = -1) const; //1:U, 2:V, 3:W, 4:T, 5-14:species
     virtual const Coord& getGradVT(int num = -1) const { return m_gradsVT[num-1]; }; //1:U, 2:V, 3:W, 4:T
     virtual const Coord& getGradRhoI(int num = -1) const { return m_gradsRhoI[num-1]; }; //1-10 species
+    virtual const Coord& getGradXI(int num = -1) const { return m_gradsX[num-1]; }; //1-10 species
 
     protected:
     
     std::vector<double> m_transportProperties; // !<array of transport properties    
     std::vector<Coord> m_gradsVT;                   //!< Gradient vectors of the velocities of the cell in x-, y- and z-directions and T   
     std::vector<Coord> m_gradsRhoI;                   //!< Gradient vectors of the density array of the cell 
+    std::vector<Coord> m_gradsX;                   //!< Gradient vectors of the molar fractions of the cell
 
     private:
 };

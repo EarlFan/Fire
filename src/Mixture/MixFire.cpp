@@ -96,6 +96,8 @@ MixFire::MixFire(XMLElement *state, std::string fileName) :
   // set pressure
   m_pressure = this->computePressure();
 
+  updateMolarFractionArray();
+
   for(int ll=0;ll<NS;ll++)m_densityArray_change[ll]=0;
   m_pMax = m_pressure;
 }
@@ -269,6 +271,24 @@ void MixFire::con2pri()
 
   if(m_pressure > m_pMax) m_pMax = m_pressure;
 
+  updateMolarFractionArray();
+}
+
+//***************************************************************************
+// update m_molarFractionArray
+// Updating: T, p, c
+void MixFire::updateMolarFractionArray()
+{
+  std::array<double, NS> molarFractions;
+  double totalMoles = 0.0;
+  for (int i = 0; i < NS; ++i) {
+      totalMoles += m_densityArray[i] / Sptr[i].MW;
+  }
+  for (int i = 0; i < NS; ++i) {
+      molarFractions[i] = (m_densityArray[i] / Sptr[i].MW) / totalMoles;
+  }
+
+  m_molarFractionArray = molarFractions;
 }
 
 //****************************************************************************
@@ -629,11 +649,14 @@ void MixFire::getBufferSlopes(double *buffer, int &counter)
 //******************************* ACCESSORS **********************************
 //****************************************************************************
 
-
-// fane
 std::array<double,NS> const & MixFire:: getDensityArray() const
 {
   return m_densityArray;
+}
+
+std::array<double,NS> const & MixFire:: getMolarFractionArray() const
+{
+  return m_molarFractionArray;
 }
 
 //***************************************************************************

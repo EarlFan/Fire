@@ -245,7 +245,8 @@ void Input::entreeAMRFire(std::string casTest)
       if (error != XML_NO_ERROR) throw ErrorXMLAttribut("riemann_type", fileName.str(), __FILE__, __LINE__);
       error = element->QueryIntAttribute("test_prob", &AMRPara::test_prob);
       if (error != XML_NO_ERROR) { AMRPara::test_prob = -1;}
-      // throw ErrorXMLAttribut("test_prob", fileName.str(), __FILE__, __LINE__);
+      error = element->QueryIntAttribute("species_diffusion_type", &AMRPara::species_diffusion_type);
+      if (error != XML_NO_ERROR) { AMRPara::species_diffusion_type = 0;}
 
     }
     else{ throw ErrorXMLDev(fileName.str(), __FILE__, __LINE__); }

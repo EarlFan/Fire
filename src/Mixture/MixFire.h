@@ -126,6 +126,10 @@ class MixFire : public Mixture
 
       //Specific method for Fire
       virtual std::array<double,NS> const & getDensityArray() const;
+      
+      virtual void updateMolarFractionArray();
+
+      virtual std::array<double,NS> const & getMolarFractionArray() const;
 
       virtual void setDensityArray(const double densityArray[NS]);
 
@@ -205,6 +209,7 @@ class MixFire : public Mixture
     private:
       double m_totalDensity;         //!< total density
       std::array<double, NS> m_densityArray;
+      std::array<double, NS> m_molarFractionArray; //!< molar fraction array
       Coord m_velocity;              //!< mixture velocity
       double m_pressure;             //!< mixture pressure
       double m_temperature;           //!< temperature

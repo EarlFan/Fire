@@ -212,6 +212,8 @@ class Mixture
       
       //Specific method for MixFire
       virtual std::array<double,NS> const & getDensityArray() const { Errors::errorMessage("getDensityArray not available for required mixture"); };
+      virtual std::array<double,NS> const & getMolarFractionArray() const { Errors::errorMessage("getMolarFractionArray not available for required mixture"); };
+      virtual void updateMolarFractionArray(){Errors::errorMessage("updateMolarFractionArray not implemente pour mixture utilise"); };
       virtual Coord getMomentum() const { Errors::errorMessage("getVelocity not available for required mixture"); return 0; };
       //virtual double getIntEne() const { Errors::errorMessage("getEnergy not available for required mixture"); return 0.; };
       //virtual double getTotalEne() const { Errors::errorMessage("getTotalEnergy not available for required mixture"); return 0.; };

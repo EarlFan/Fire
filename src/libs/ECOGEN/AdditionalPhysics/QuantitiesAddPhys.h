@@ -94,7 +94,9 @@ class QuantitiesAddPhys
     // add by Fan E
     virtual const Coord& getGradVT(int num = -1) const { Errors::errorMessage("getGradVT not implemented for used quantities of additional physics"); return Coord::defaultCoord; };
 
-    virtual const Coord& getGradRhoI(int num = -1) const { Errors::errorMessage("getGradVT not implemented for used quantities of additional physics"); return Coord::defaultCoord; };
+    virtual const Coord& getGradRhoI(int num = -1) const { Errors::errorMessage("getGradRhoI not implemented for used quantities of additional physics"); return Coord::defaultCoord; };
+
+    virtual const Coord& getGradXI(int num = -1) const { Errors::errorMessage("getGradXI not implemented for used quantities of additional physics"); return Coord::defaultCoord; };
 
     protected:
       AddPhys* m_addPhys;           //!< Corresponding additional-physic class of this quantities class

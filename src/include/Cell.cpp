@@ -153,6 +153,7 @@ void Cell::fill(std::vector<GeometricalDomain*> &domains, const int &lvlMax)
             m_mixture->setDensity(rhoMixCell);
             m_mixture->setTemperature(T);
             m_mixture->setPressure(p);
+            m_mixture->updateMolarFractionArray();
             m_mixture->setU(0.);
             m_mixture->setV(0.);
             m_mixture->setW(0.);
@@ -209,6 +210,7 @@ void Cell::fill(std::vector<GeometricalDomain*> &domains, const int &lvlMax)
           m_mixture->setDensity(rhoMixCell);
           m_mixture->setTemperature(T);
           m_mixture->setPressure(p);
+          m_mixture->updateMolarFractionArray();
           m_mixture->setU(u);
         }
 
@@ -259,7 +261,7 @@ void Cell::fill(std::vector<GeometricalDomain*> &domains, const int &lvlMax)
           m_mixture->setDensity(rhoMixCell);
           m_mixture->setTemperature(T);
           m_mixture->setPressure(p);
-          
+          m_mixture->updateMolarFractionArray();
         }
 
       }
@@ -372,6 +374,7 @@ double Cell::calcTauGradRho()
 
 //***********************************************************************
 // compute gradients of velocity and temperature for viscous flux evaluation.
+// add gradients of pressure and molar fraction for pressure-dependent diffusion
 void Cell::computeGradient(std::vector<Coord> &grads, std::vector<Variable> &nameVariables, std::vector<int> &numPhases)
 {
   int typeCellInterface(0);
@@ -479,6 +482,84 @@ void Cell::computeRhoIGradient(std::vector<Coord> &grads)
   double distance(0.), distanceX(0.), distanceY(0.), distanceZ(0.);
   double sumDistanceX(0.), sumDistanceY(0.), sumDistanceZ(0.);
   Variable flag = density;
+  for (unsigned int g = 0; g < grads.size(); g++) { grads[g] = 0.; }
+
+  for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
+    if (!m_cellInterfaces[b]->getSplit()) {
+      typeCellInterface = m_cellInterfaces[b]->whoAmI();
+      if (typeCellInterface == 0) //Cell interface type CellInterface/O2, for boundary cellInterface, gradRhoi = 0
+      {
+        // Sum for each cell interface with ponderation using distance in each direction
+        // then the cell gradient is normalized by sum of distances.
+        distanceX = std::fabs(m_cellInterfaces[b]->getCellGauche()->distanceX(m_cellInterfaces[b]->getCellDroite()));
+        distanceY = std::fabs(m_cellInterfaces[b]->getCellGauche()->distanceY(m_cellInterfaces[b]->getCellDroite()));
+        distanceZ = std::fabs(m_cellInterfaces[b]->getCellGauche()->distanceZ(m_cellInterfaces[b]->getCellDroite()));
+        sumDistanceX += distanceX;
+        sumDistanceY += distanceY;
+        sumDistanceZ += distanceZ;
+        distance = m_cellInterfaces[b]->getCellGauche()->distance(m_cellInterfaces[b]->getCellDroite());
+
+        // Extracting left and right variables values for each cell interface
+        // and calculus of the gradients normal to the face
+        for (unsigned int g = 0; g < grads.size(); g++) {
+          cg = m_cellInterfaces[b]->getCellGauche()->selectScalar(flag, g);
+          cd = m_cellInterfaces[b]->getCellDroite()->selectScalar(flag, g);
+          gradCellInterface = (cd - cg) / distance;
+
+          // Projection in the absolute system of coordinate
+          grads[g].setXYZ(grads[g].getX() + m_cellInterfaces[b]->getFace()->getNormal().getX()*gradCellInterface*distanceX,
+                          grads[g].getY() + m_cellInterfaces[b]->getFace()->getNormal().getY()*gradCellInterface*distanceY,
+                          grads[g].getZ() + m_cellInterfaces[b]->getFace()->getNormal().getZ()*gradCellInterface*distanceZ);
+        }
+      }
+      else {
+        distanceX = std::fabs(this->distanceX(m_cellInterfaces[b])) * 2.;
+        distanceY = std::fabs(this->distanceY(m_cellInterfaces[b])) * 2.;
+        distanceZ = std::fabs(this->distanceZ(m_cellInterfaces[b])) * 2.;
+        sumDistanceX += distanceX;
+        sumDistanceY += distanceY;
+        sumDistanceZ += distanceZ;
+        distance = this->distance(m_cellInterfaces[b]);
+
+        // for nonreflecting, symmetry, wall, outflow B.C., no flux at such interfaces.
+        // gradient on this interface is 0
+        if(typeCellInterface == 1 || typeCellInterface == 6 || typeCellInterface == 2 || typeCellInterface == 3)
+        {
+          for (unsigned int g = 0; g < grads.size(); g++) {
+            // grads[g].setXYZ(0, 0, 0);
+          }
+        }
+        else
+        {
+          // printf("B.C. type = %d, this B.C. is not supported in Cell::computeRhoIGradient().\n", typeCellInterface);
+          // exit(EXIT_FAILURE);
+        }
+
+      }
+    }
+  }
+
+  // Verifications in multiD
+  if (sumDistanceX <= 1.e-12) { sumDistanceX = 1.; }
+  if (sumDistanceY <= 1.e-12) { sumDistanceY = 1.; }
+  if (sumDistanceZ <= 1.e-12) { sumDistanceZ = 1.; }
+
+  // Final normalized gradient on the cell
+  for (unsigned int g = 0; g < grads.size(); g++) {
+    grads[g].setXYZ(grads[g].getX() / sumDistanceX, grads[g].getY() / sumDistanceY, grads[g].getZ() / sumDistanceZ);
+  }
+}
+
+//***********************************************************************
+// compute gradients of molar fraction for pressure-dependent diffusion
+
+void Cell::computeXGradient(std::vector<Coord> &grads)
+{
+  int typeCellInterface(0);
+  double cg(0.), cd(0.), gradCellInterface(0.);
+  double distance(0.), distanceX(0.), distanceY(0.), distanceZ(0.);
+  double sumDistanceX(0.), sumDistanceY(0.), sumDistanceZ(0.);
+  Variable flag = molarFraction;
   for (unsigned int g = 0; g < grads.size(); g++) { grads[g] = 0.; }
 
   for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {

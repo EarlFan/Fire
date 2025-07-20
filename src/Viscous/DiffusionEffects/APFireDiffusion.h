@@ -64,11 +64,16 @@ class APFireDiffusion : public APFire
     //! \param     numberPhases         number of phases
     void solveFluxViscosityInner(Coord &velocityLeft, Coord &velocityRight, 
       std::array<double,NS> &rhoArrayL, std::array<double,NS> &rhoArrayR, 
+      std::array<double,NS> &XArrayL, std::array<double,NS> &XArrayR, 
       Coord &gradULeft, Coord &gradURight, 
-      Coord &gradVLeft, Coord &gradVRight, Coord &gradWLeft, Coord &gradWRight, 
-      Coord &gradTLeft, Coord &gradTRight, std::array<Coord,NS> &gradRhoLeft, 
-      std::array<Coord,NS> &gradRhoRight, std::array<double,NS+2> &m_trans, 
-      double m_T_face, int numberPhases, CellInterface *cellInterface) const;
+      Coord &gradVLeft, Coord &gradVRight, 
+      Coord &gradWLeft, Coord &gradWRight, 
+      Coord &gradTLeft, Coord &gradTRight, 
+      Coord &gradPLeft, Coord &gradPRight, 
+      std::array<Coord,NS> &gradRhoLeft, std::array<Coord,NS> &gradRhoRight, 
+      std::array<Coord,NS> &gradXLeft, std::array<Coord,NS> &gradXRight, 
+      std::array<double,NS+2> &m_trans, double T_face, double m_P_face, 
+      int numberPhases, CellInterface *cellInterface) const;
     //! \brief     Solve the viscosity flux at a boundary with an non-reflecting type
     //! \param     velocityLeft         velocity of the left cell
     //! \param     gradULeft            gradient of the velocity in the x-direction of the left cell
@@ -126,13 +131,21 @@ class APFireDiffusion : public APFire
     Coord m_gradWRight;       //!< Right gradient of the velocity in the z-direction for the flux computation (buffer)
     
     std::array<double,NS> m_rhoArrayL;
+    std::array<double,NS> m_XArrayL;
     double m_TemperatureL;
+    double m_pressureL;
     Coord m_gradTLeft;
+    Coord m_gradPLeft;
     std::array<Coord,NS> m_gradRhoLeft;
+    std::array<Coord,NS> m_gradXLeft;
     std::array<double,NS> m_rhoArrayR;
+    std::array<double,NS> m_XArrayR;
     double m_TemperatureR;
+    double m_pressureR;
     Coord m_gradTRight;
+    Coord m_gradPRight;
     std::array<Coord,NS> m_gradRhoRight;
+    std::array<Coord,NS> m_gradXRight;
 
     Coord m_normal;           //!< Normal vector of the corresponding face for the flux computation (buffer)
     Coord m_tangent;          //!< Tangent vector of the corresponding face for the flux computation (buffer)

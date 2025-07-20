@@ -112,7 +112,7 @@ void ModFire::fulfillState(Phase **phases, Mixture *mixture, const int &numberPh
     for (int k = 0; k < numberPhases; k++) { phases[k]->setTemperature(mixture->getTemperature()); }
   }
 
-
+  mixture->updateMolarFractionArray();
 }
 
 void ModFire::solveRiemannIntern(Cell &cellLeft, Cell &cellRight, const int &numberPhases, const double &dxLeft, const double &dxRight, double &dtMax) const

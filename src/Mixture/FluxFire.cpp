@@ -276,6 +276,7 @@ void FluxFire::prepSourceTermsReaction(Cell *cell, const double &dt, const int &
   // set temperature to mixture for better convergence when calculate T from rho[] and e_int
   cell->getMixture()->setTemperature(T);
   cell->getMixture()->setPressure(gas->pressure());
+  cell->getMixture()->updateMolarFractionArray();
 
   // add the chemical species change into mixture
   for(int k=0;k<NS;k++) 
