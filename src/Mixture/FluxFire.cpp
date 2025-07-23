@@ -56,8 +56,8 @@ FluxFire::~FluxFire(){}
 
 void FluxFire::printFlux() const
 {
-  // for(int ll=0;ll<NS;ll++) cout << m_masse[ll]<<", "<<endl;
-  // cout << m_qdm.getX() << " " << m_energ << endl;
+  for(int ll=0;ll<NS;ll++) cout << m_masse[ll]<<", "<<endl;
+  cout << m_qdm.getX() << " " << m_energ << endl;
   printf("m_cons, 0 = %le, 1 = %le, 2 = %le.\n",m_masse[0],m_masse[1],m_masse[2]);
   printf("m_cons, u = %30.20le, v = %30.20le, e = %30.20le.\n",m_qdm.getX(),
     m_qdm.getY(),m_energ);
@@ -131,7 +131,16 @@ void FluxFire::buildCons(Phase **phases, const int &numberPhases, Mixture *mixtu
     exit(EXIT_FAILURE);
   }
   m_qdm = totalRho*mixture->getVelocity();
-  m_energ = totalRho*mixture->getTotalEnergy();
+
+  // m_energ = totalRho*mixture->getTotalEnergy();
+
+  // call the method in Cantera
+  std::shared_ptr<Cantera::ThermoPhase> gas = solution_mech->thermo();
+  double Y[NS];
+  for(int i=0;i<NS;i++) Y[i] = m_masse[i]/totalRho;
+  gas->setState_TPY(mixture->getTemperature(), mixture->getPressure(), Y);
+  double intEnergy = gas->intEnergy_mass();
+  m_energ = totalRho*(intEnergy+mixture->getVelocity().squaredNorm()/2.0);
 }
 
 //***********************************************************************
@@ -232,6 +241,7 @@ void FluxFire::setCons(const Flux *cons, const int &numberPhases)
 // Old chemical source term
 void FluxFire::prepSourceTermsReaction(Cell *cell, const double &dt, const int &numberPhases, std::shared_ptr<Cantera::Solution> sol_)
 {
+  double cell_x = cell->getPosition().getX();
   double Ys[NS],rhoMix(0.),Unity(0),Ys_old[NS],delta_rho[NS];
   std::array<double, NS> rhoArray;
   double rho = cell->getMixture()->getDensity();
@@ -249,7 +259,7 @@ void FluxFire::prepSourceTermsReaction(Cell *cell, const double &dt, const int &
 
   reactor.insert(sol_);
   net.addReactor(reactor);
-
+  
   gas->setState_TPY(T,P,Ys);
 
   reactor.syncState();
@@ -265,18 +275,29 @@ void FluxFire::prepSourceTermsReaction(Cell *cell, const double &dt, const int &
     Unity += Ys[k];
   }
 
+  double rhoArray_new[NS];
+
   for(int k=0;k<NS;k++) 
   {
     Ys[k] = Ys[k]/Unity;
-    m_masse[k] = Ys[k]*rho;
+    rhoArray_new[k] = Ys[k]*rho;
   }
 
   T = gas->temperature();
 
-  // set temperature to mixture for better convergence when calculate T from rho[] and e_int
+  // update all primitive variables in mixture
+  cell->getMixture()->setDensity(rho);
+  cell->getMixture()->setDensityArray(rhoArray_new);
   cell->getMixture()->setTemperature(T);
   cell->getMixture()->setPressure(gas->pressure());
   cell->getMixture()->updateMolarFractionArray();
+
+  double intEng = gas->intEnergy_mass();
+  double v_square = cell->getMixture()->getVelocity().squaredNorm();
+  double total_energy = gas->intEnergy_mass() + 0.5 * v_square;
+  cell->getMixture()->setIntEng(intEng);
+  cell->getMixture()->setTotalEnergy(total_energy);
+  cell->getMixture()->computeFrozenSoundSpeed();
 
   // add the chemical species change into mixture
   for(int k=0;k<NS;k++) 

@@ -67,8 +67,8 @@ void SourceReaction::integrateSourceTerms(Cell *cell, const int &numberPhases, c
   //Source terms integration on conservative quantities
   if(m_reactionFlag!=0)
   {
-    cell->buildCons(numberPhases);
+    // cell->buildCons(numberPhases);
     cell->getCons()->prepSourceTermsReaction(cell, dt, numberPhases,sol_);
-    cell->buildPrim(numberPhases);
+    // cell->buildPrim(numberPhases);
   }
 }

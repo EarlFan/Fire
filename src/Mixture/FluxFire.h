@@ -80,7 +80,7 @@ class FluxFire : public Flux
 protected:
     std::array<double,NS> m_masse;          //!< mass array - fane
     Coord m_qdm;              //!< momentum array
-    double m_energ;          //!< specific internal energy array
+    double m_energ;          //!< specific internal energy
     ModFire *m_model;       //!< associated model
 
   private:

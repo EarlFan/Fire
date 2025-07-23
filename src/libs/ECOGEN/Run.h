@@ -110,6 +110,7 @@ class Run
     void calcTotalLeafCell();
     void getPeakValues();
     void calcHRR();
+    void print();
 
     int m_numTest;                             //!<Number of the simulation
 
@@ -177,9 +178,9 @@ class Run
     double totalMassPara[NS];
     double posVorticity, posVorticityPara, negVorticity, negVorticityPara;
     double totalVorticity, totalVorticityPara,enstropy, enstropyPara;
-    double Tmax,TmaxGlobal,Pmax,PmaxGlobal,rhoH2O_Max,rhoH2O_MaxGlobal;
+    double Tmax,TmaxGlobal,Pmax,PmaxGlobal,rhoH2O_Max,rhoH2O_MaxGlobal, Vmax, VmaxGlobal;
     double TmaxA,TmaxAGlobal,PmaxA,PmaxAGlobal,rhoH2OA_Max,rhoH2OA_MaxGlobal;
-    double Tmin, TminGlobal, Pmin, PminGlobal;
+    double Tmin, TminGlobal, Pmin, PminGlobal, Vmin, VminGlobal;
     double XL, XLGlobal, XR, XRGlobal, YR, YRGlobal;
     double flameArea,flameAreaGlobal;
     double bubbleVolume, bubbleVolumeGlobal;

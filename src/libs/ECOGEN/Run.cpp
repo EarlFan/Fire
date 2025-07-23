@@ -397,8 +397,8 @@ void Run::solver()
         if(rankCpu == 0) printf("total_leaf_cells_para = %d.\n",total_leaf_cells_para);
       }
       // printf("T_max = %le K, T_min = %le K, p_max = %le Pa, p_min = %le Pa.\n", TmaxGlobal, TminGlobal, PmaxGlobal, PminGlobal);
-      printf("T_range = [%.2f, %.2f] K, p_range = [%.4E, %.4E] Pa\n", 
-        TminGlobal, TmaxGlobal, PminGlobal, PmaxGlobal); 
+      printf("T_range = [%.2f, %.2f] K, p_range = [%.4E, %.4E] Pa, V_norm_range = [%.4E, %.4E] m/s.\n", 
+        TminGlobal, TmaxGlobal, PminGlobal, PmaxGlobal, VminGlobal, VmaxGlobal); 
       printf("**********************************************\n");
     }
     //-------------------- CONTROL ITERATIONS/TIME ---------------------
@@ -479,7 +479,7 @@ void Run::solver()
     //-------------------------- TIME STEP UPDATING --------------------------
 
     m_dt = m_dtNext;
-    // m_dt = 1e-4;
+    // m_dt = 1e-8;
 
   } //time iterative loop end
   if (rankCpu == 0) std::cout << "T" << m_numTest << " | -------------------------------------------" << std::endl;
@@ -616,12 +616,23 @@ void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsT
 
 void Run::advancingProcedure(double &dt, int &lvl, double &dtMax)
 {
-  //1) Finite volume scheme for hyperbolic systems (Godunov or MUSCL)
+  double half_dt = 0.5*dt;
+
+  double zero = 0;
+
+  if (m_numberSources) this->solveSourceTerms(half_dt, lvl);
+
+  // 1) Finite volume scheme for hyperbolic systems (Godunov or MUSCL)
   if (m_order == "FIRSTORDER") { this->solveHyperbolic(dt, lvl, dtMax); }
   else { this->solveHyperbolicO2(dt, lvl, dtMax); }
 
+  if (m_numberSources) this->solveSourceTerms(half_dt, lvl);
 
-  if (m_numberSources) this->solveSourceTerms(dt, lvl);
+  for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) {
+    if (!m_cellsLvl[lvl][i]->getSplit()) {
+      m_cellsLvl[lvl][i]->setToZeroCons(m_numberPhases, m_numberTransports);
+    }
+  }
 
   //4) Relaxations to equilibria
   if (m_numberPhases > 1) this->solveRelaxations(lvl);
@@ -971,7 +982,7 @@ void Run::solveSourceTerms(double &dt, int &lvl)
   for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) {
     if (!m_cellsLvl[lvl][i]->getSplit()) {
       for (unsigned int s = 0; s < m_sources.size(); s++) { m_sources[s]->integrateSourceTerms(m_cellsLvl[lvl][i], m_numberPhases, dt, sol); }
-      m_cellsLvl[lvl][i]->setToZeroCons(m_numberPhases, m_numberTransports);
+
     }
   }
 }
@@ -1027,6 +1038,39 @@ void Run::verifyErrors() const
     }
   }
   catch (ErrorECOGEN &) { throw; }
+}
+
+//***********************************************************************
+void Run::print()
+{
+  for (int lvl = 0; lvl <= m_lvlMax; lvl++){
+    for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) {
+      if (!m_cellsLvl[lvl][i]->getSplit()) {
+
+        printf("cell_x = %12.7e, T = %12.7e, p = %12.7e, u = %12.7e, \n \\
+          rho_0 = %15.7e, rho_1 = %15.7e, \n \\
+          rho_2 = %15.7e, rho_3 = %15.7e, rho_4 = %15.7e, \n \\
+          rho_5 = %15.7e, rho_6 = %15.7e, rho_7 = %15.7e, \n \\
+          rho_8 = %15.7e, rho_9 = %15.7e.\n", 
+          m_cellsLvl[lvl][i]->getPosition().getX(),
+          m_cellsLvl[lvl][i]->getMixture()->getTemperature(),
+          m_cellsLvl[lvl][i]->getMixture()->getPressure(),
+          m_cellsLvl[lvl][i]->getMixture()->getVelocity().getX(),
+          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[0],
+          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[1],
+          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[2],
+          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[3],
+          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[4],
+          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[5],
+          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[6],
+          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[7],
+          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[8],
+          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[9]
+        );
+
+      }
+    }
+  }
 }
 
 //***********************************************************************

@@ -122,18 +122,24 @@ void Run::getPeakValues()
   Pmax = -1e30;
   Tmin = 1e30;
   Pmin = 1e30;
+  Vmax = -1e30;
+  Vmin = 1e30;
 
-  double T_temp, p_temp;
+  double T_temp, p_temp, V_temp;
   for(int lvl = m_lvlMax; lvl>=0; lvl--)
   {
     for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) 
     {
       T_temp = m_cellsLvl[lvl][i]->getMixture()->getTemperature();
       p_temp = m_cellsLvl[lvl][i]->getMixture()->getPressure();
+      V_temp = m_cellsLvl[lvl][i]->getMixture()->getVelocity().squaredNorm();
+      V_temp = sqrt(V_temp);
       if(Tmax < T_temp) Tmax = T_temp;
       if(Pmax < p_temp) Pmax = p_temp;
       if(Tmin > T_temp) Tmin = T_temp;
       if(Pmin > p_temp) Pmin = p_temp;
+      if(Vmax < V_temp) Vmax = V_temp;
+      if(Vmin > V_temp) Vmin = V_temp;
     }
   }
 
@@ -142,6 +148,8 @@ void Run::getPeakValues()
   MPI_Reduce(&Pmax, &PmaxGlobal, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
   MPI_Reduce(&Tmin, &TminGlobal, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
   MPI_Reduce(&Pmin, &PminGlobal, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+  MPI_Reduce(&Vmax, &VmaxGlobal, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+  MPI_Reduce(&Vmin, &VminGlobal, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 }
 
 //***********************************************************************

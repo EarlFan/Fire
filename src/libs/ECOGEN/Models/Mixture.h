@@ -202,6 +202,7 @@ class Mixture
       virtual void setV(const double &v) { Errors::errorMessage("setV non implemente pour mixture utilise"); };
       virtual void setW(const double &w) { Errors::errorMessage("setW non implemente pour mixture utilise"); };
       virtual void setTotalEnergy(double &totalEnergy) { Errors::errorMessage("setTotalEnergy not available for required mixture"); };
+      virtual void setIntEng(double &intEng) { Errors::errorMessage("setIntEng not available for required mixture"); };
       virtual void set_deltaEnthalpy(const double &delta_h_mass) { Errors::errorMessage("set_deltaEnthalpy non implemente pour mixture utilise"); }
 
       //Operators

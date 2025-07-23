@@ -46,8 +46,8 @@ void CellO2::addHalfTimeCons(const int &numberPhases)
 {
   m_consHalfTime->setBufferFlux2();      //fluxTempXXX receive half time conservative variables
   
-  m_cons->addFlux(1., numberPhases);                       // add half time cons to m_cons, now m_cons = Q_0 + DQ_1/2 * DT + Q_1/2
+  m_cons->addFlux(1., numberPhases);     // add half time cons to m_cons, now m_cons = Q_0 + DQ_1/2 * DT + Q_1/2
 
-  m_cons->multiply(0.5, numberPhases);                     // Q2 = 0.5*(Q_0 + DQ_1/2*DT + Q_1/2)
+  m_cons->multiply(0.5, numberPhases);   // Q2 = 0.5*(Q_0 + DQ_1/2*DT + Q_1/2)
 }
 

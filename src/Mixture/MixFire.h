@@ -118,6 +118,7 @@ class MixFire : public Mixture
       virtual void setV(const double &v);
       virtual void setW(const double &w);
       virtual void setTotalEnergy(double &totalEnergy);
+      virtual void setIntEng(double &intEng) { m_energie = intEng; };
 
       //Operators
       virtual void changeSign();
