@@ -27,7 +27,9 @@
 - Linux OS (Ubuntu 20.04/RedHat tested)
 - MPI implementation (OpenMPI recommended)
 - Conda package manager
-- Cantera 3.0.0b1 with C++ interface
+- Cantera 3.1.0 with C++ interface
+- cmake 3.10 or higher
+
 
 ### Step-by-Step Setup
 
@@ -114,6 +116,7 @@ Recommended visualization workflow:
 | `riemann_type`         | meshV5.xml      | 1(HLL), 2(HLLC), 3(HLLC-LM) | Inviscid flux scheme selection        |
 | `gradRho_flag`         | meshV5.xml      | 0/1             | Turn on/off the 3rd AMR strategy   |
 | `lvlHydro`/`lvlChem`   | meshV5.xml      | Integer         | AMR level limits for hydrodynamical and chemical processes |
+|`species_diffusion_type`| meshV5.xml      | 0/1             | 0: conventional species diffusion, 1: pressure variation-dependent species diffusion|
 | `CanteraInput`         | modelV4.xml     | Path to YAML    | Chemistry configuration      |
 
 ### Critical Notes
