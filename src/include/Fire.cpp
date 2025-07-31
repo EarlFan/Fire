@@ -55,7 +55,8 @@ int AMRPara::chem_step_gap = 1;
 int AMRPara::g_lvlmax = -1;
 int AMRPara::riemann_type = -1;
 int AMRPara::test_prob = -1;
-int AMRPara::species_diffusion_type = 0; // Default value, can be set based on the problem requirements
+int AMRPara::species_diffusion_type = 0; 
+int AMRPara::strang_splitting_flag = 1; 
 
 // return summation of NS elements
 double sumNS(double *arr)

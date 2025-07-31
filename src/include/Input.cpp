@@ -247,7 +247,15 @@ void Input::entreeAMRFire(std::string casTest)
       if (error != XML_NO_ERROR) { AMRPara::test_prob = -1;}
       error = element->QueryIntAttribute("species_diffusion_type", &AMRPara::species_diffusion_type);
       if (error != XML_NO_ERROR) { AMRPara::species_diffusion_type = 0;}
-
+      error = element->QueryIntAttribute("strang_splitting_flag", &AMRPara::strang_splitting_flag);
+      if (error != XML_NO_ERROR) {
+        if (AMRPara::test_prob == 5) {
+          AMRPara::strang_splitting_flag = 0;
+        }
+        else{
+          AMRPara::strang_splitting_flag = 1;
+        }
+      }
     }
     else{ throw ErrorXMLDev(fileName.str(), __FILE__, __LINE__); }
   }

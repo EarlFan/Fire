@@ -618,15 +618,24 @@ void Run::advancingProcedure(double &dt, int &lvl, double &dtMax)
 {
   double half_dt = 0.5*dt;
 
-  double zero = 0;
-
-  if (m_numberSources) this->solveSourceTerms(half_dt, lvl);
+  if (m_numberSources){
+    // Strang splitting: half step for source terms
+    if (AMRPara::strang_splitting_flag) this->solveSourceTerms(half_dt, lvl);
+  }
 
   // 1) Finite volume scheme for hyperbolic systems (Godunov or MUSCL)
   if (m_order == "FIRSTORDER") { this->solveHyperbolic(dt, lvl, dtMax); }
   else { this->solveHyperbolicO2(dt, lvl, dtMax); }
 
-  if (m_numberSources) this->solveSourceTerms(half_dt, lvl);
+  if (m_numberSources){
+    // Strang splitting: half step for source terms
+    if (AMRPara::strang_splitting_flag) {
+      this->solveSourceTerms(half_dt, lvl);
+    }
+    else{
+      this->solveSourceTerms(dt, lvl);
+    }
+  }
 
   for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) {
     if (!m_cellsLvl[lvl][i]->getSplit()) {

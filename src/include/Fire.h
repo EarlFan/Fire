@@ -72,6 +72,7 @@ public:
 	static int riemann_type;
 	static int test_prob;
 	static int species_diffusion_type;
+	static int strang_splitting_flag;
 };
 
 using namespace std;
