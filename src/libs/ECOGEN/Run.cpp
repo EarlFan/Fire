@@ -1057,34 +1057,34 @@ void Run::verifyErrors() const
 //***********************************************************************
 void Run::print()
 {
-  for (int lvl = 0; lvl <= m_lvlMax; lvl++){
-    for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) {
-      if (!m_cellsLvl[lvl][i]->getSplit()) {
+  // for (int lvl = 0; lvl <= m_lvlMax; lvl++){
+  //   for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) {
+  //     if (!m_cellsLvl[lvl][i]->getSplit()) {
 
-        printf("cell_x = %12.7e, T = %12.7e, p = %12.7e, u = %12.7e, \n \\
-          rho_0 = %15.7e, rho_1 = %15.7e, \n \\
-          rho_2 = %15.7e, rho_3 = %15.7e, rho_4 = %15.7e, \n \\
-          rho_5 = %15.7e, rho_6 = %15.7e, rho_7 = %15.7e, \n \\
-          rho_8 = %15.7e, rho_9 = %15.7e.\n", 
-          m_cellsLvl[lvl][i]->getPosition().getX(),
-          m_cellsLvl[lvl][i]->getMixture()->getTemperature(),
-          m_cellsLvl[lvl][i]->getMixture()->getPressure(),
-          m_cellsLvl[lvl][i]->getMixture()->getVelocity().getX(),
-          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[0],
-          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[1],
-          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[2],
-          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[3],
-          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[4],
-          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[5],
-          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[6],
-          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[7],
-          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[8],
-          m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[9]
-        );
+  //       printf("cell_x = %12.7e, T = %12.7e, p = %12.7e, u = %12.7e, \n \\
+  //         rho_0 = %15.7e, rho_1 = %15.7e, \n \\
+  //         rho_2 = %15.7e, rho_3 = %15.7e, rho_4 = %15.7e, \n \\
+  //         rho_5 = %15.7e, rho_6 = %15.7e, rho_7 = %15.7e, \n \\
+  //         rho_8 = %15.7e, rho_9 = %15.7e.\n", 
+  //         m_cellsLvl[lvl][i]->getPosition().getX(),
+  //         m_cellsLvl[lvl][i]->getMixture()->getTemperature(),
+  //         m_cellsLvl[lvl][i]->getMixture()->getPressure(),
+  //         m_cellsLvl[lvl][i]->getMixture()->getVelocity().getX(),
+  //         m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[0],
+  //         m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[1],
+  //         m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[2],
+  //         m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[3],
+  //         m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[4],
+  //         m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[5],
+  //         m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[6],
+  //         m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[7],
+  //         m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[8],
+  //         m_cellsLvl[lvl][i]->getMixture()->getDensityArray()[9]
+  //       );
 
-      }
-    }
-  }
+  //     }
+  //   }
+  // }
 }
 
 //***********************************************************************
