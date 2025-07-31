@@ -6,7 +6,7 @@
 		<iterations number="2" iterFreq="1"/>
 		<physicalTime totalTime="500.e-6" timeFreq="5.e-6"/>
 	</timeControlMode>
-	<computationControl CFL="0.6"/>
+	<computationControl CFL="0.3"/>
 	<secondOrder>
 		<globalLimiter>vanleer</globalLimiter>
 	</secondOrder>
