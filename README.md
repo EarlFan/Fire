@@ -116,7 +116,8 @@ Recommended visualization workflow:
 | `riemann_type`         | meshV5.xml      | 1(HLL), 2(HLLC), 3(HLLC-LM) | Inviscid flux scheme selection        |
 | `gradRho_flag`         | meshV5.xml      | 0/1             | Turn on/off the 3rd AMR strategy   |
 | `lvlHydro`/`lvlChem`   | meshV5.xml      | Integer         | AMR level limits for hydrodynamical and chemical processes |
-|`species_diffusion_type`| meshV5.xml      | 0/1             | 0: conventional species diffusion, 1: pressure variation-dependent species diffusion|
+|`species_diffusion_type`| meshV5.xml      | 0/1, default 0  | 0: conservative species diffusion, 1: pressure variation-dependent species diffusion|
+| `strang_splitting_flag`| meshV5.xml      | 0/1, default 1  | 0: turn off Strang splitting; 1: turn on Strang splitting |
 | `CanteraInput`         | modelV4.xml     | Path to YAML    | Chemistry configuration      |
 
 ### Critical Notes
