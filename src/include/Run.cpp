@@ -166,3 +166,23 @@ void Run::calcHRR()
     }
   }
 }
+
+//***********************************************************************
+void Run::prob_specific_setting()
+{
+  if(AMRPara::test_prob == 5) 
+  {
+    if(AMRPara::physical_time < 150e-6)
+    {
+      AMRPara::strang_splitting_flag = 0; 
+    }
+    else // set to strang splitting after 120 us
+    {
+      AMRPara::strang_splitting_flag = 1; 
+    }
+
+    if(rankCpu == 0){
+      // std::cout<<"AMRPara::strang_splitting_flag = "<<AMRPara::strang_splitting_flag<<std::endl;
+    }
+  }
+}

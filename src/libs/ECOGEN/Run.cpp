@@ -254,6 +254,8 @@ void Run::restartSimulation()
 {
   std::ifstream fileStream;
 
+  AMRPara::physical_time = m_physicalTime;
+
   //Reconstruct the mesh and get physical data from restart point
   try {
     if (m_mesh->getType() == AMR) {
@@ -337,7 +339,10 @@ void Run::solver()
       this->verifyErrors();
     }
     catch (ErrorECOGEN &) { throw; }
-		
+
+    //------------------- problem specific setups -------------------
+    this->prob_specific_setting();
+    
     //------------------- INTEGRATION PROCEDURE -------------------
     
     //Setting cons variable to zero for spatial scheme on dU/dt: no need for time step at this point

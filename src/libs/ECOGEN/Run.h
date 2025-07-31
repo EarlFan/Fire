@@ -111,6 +111,7 @@ class Run
     void getPeakValues();
     void calcHRR();
     void print();
+    void prob_specific_setting();
 
     int m_numTest;                             //!<Number of the simulation
 

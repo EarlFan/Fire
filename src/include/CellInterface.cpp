@@ -59,7 +59,7 @@ void CellInterface::computeXi(double lvl, double lvlHydro, double lvlChem, doubl
     // cells in the left domain are not refined after 140 us
     double interface_X = this->getFace()->getPos().getX();
     double velocity_deton = 1400;
-    double coarse_init_x = 0.076;
+    double coarse_init_x = 0.176;
     // turn-off left domain refinement after 100 us for efficiency
     if(interface_X<(velocity_deton*(AMRPara::physical_time-100e-6)+coarse_init_x))
     {
