@@ -105,6 +105,16 @@ Recommended visualization workflow:
 - Use `pMax` field for cellular structure analysis
 - 1D case results can be plotted using the `plot_1D_*.py` script prepared in the 1D case folders.
 
+⚠️ Important Note for macOS Users
+
+If you encounter a parse error when opening simulation results (*.vtu files) in ParaView on a Mac, this is likely [a known issue with reading the default ASCII-format data](https://discourse.paraview.org/t/cannot-read-vtu-file-with-the-data-array-in-the-element-may-be-too-short-message/14266).
+
+To fix this, you must set the output format to binary.
+1. In your case folder, open the mainV5.xml file.
+2. Find the output settings and change the binary value to true.
+
+This will generate binary-format .vtu files that are fully compatible with ParaView on macOS.
+
 ---
 
 ## 4. Input File Configuration
