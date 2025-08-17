@@ -620,56 +620,42 @@ void APFireDiffusion::solveFluxViscosityInner(Coord &velocityLeft, Coord &veloci
 
   double rhoMixL(0.), rhoMixR(0.), YsL[NS], YsR[NS],YsM[NS];
   for(int i=0;i<NS;i++){rhoMixL+=rhoArrayL[i];rhoMixR+=rhoArrayR[i];}
-  for(int i=0;i<NS;i++){YsM[i] = 0.5*(rhoArrayL[i]/rhoMixL + rhoArrayR[i]/rhoMixR);}
 
   double JAX[NS],JA(0.), thermo[5], JSX[NS];
 
-  if (AMRPara::species_diffusion_type == 0) // Fick's law diffusion with the conservation-maintaining correction
-  {
-    for(int i=0;i<NS;i++)
-    {
-      JAX[i] = DC[i]*(drdx[i] - YsM[i]*drhoMixdx); // notes that rho gradient isn't 0
-      JA+=JAX[i];
-    }
+  double XsM[NS];
+  double rhosM[NS];
+  double rhoMix_sM(0.);
 
-    for(int i=0;i<NS;i++)JSX[i] = -JAX[i]+YsM[i]*JA;
+  // calculate face averaged values
+  for(int i=0;i<NS;i++)
+  {
+    rhosM[i] = 0.5*(rhoArrayL[i] + rhoArrayR[i]);
+    rhoMix_sM += rhosM[i];
   }
-  else if (AMRPara::species_diffusion_type == 1) // pressure dependent species diffusion
-  {
-    double XsM[NS];
-    double dXdx[NS];
-    double rhosM[NS];
+  for(int i=0;i<NS;i++){YsM[i] = rhosM[i]/rhoMix_sM;}
 
-    // face averaged molar fraction
-    for(int i=0;i<NS;i++)
-    {
-      XsM[i] = 0.5*(XArrayL[i] + XArrayR[i]);
-      rhosM[i] = 0.5*(rhoArrayL[i] + rhoArrayR[i]);
-    }
-
-    // face averaged molar fraction gradient
-    for(int i=0;i<NS;i++)
-    {
-      dXdx[i] = 0.5*(gradXLeft[i].getX()+gradXRight[i].getX());
-    }
-
-    for(int i=0;i<NS;i++)
-    {
-      if(XsM[i] > 1e-15)
-      {
-        JSX[i] = - rhosM[i]*DC[i]*(dXdx[i] + (XsM[i]-YsM[i])*dPdx/P_face)/XsM[i];
-      }
-      else
-      {
-        JSX[i] = 0.0; // avoid division by zero
-      }
-      // JSX[i] = - rhosM[i]*DC[i]*(dXdx[i] + (XsM[i]-YsM[i])*dPdx/P_face)/XsM[i];
-    }
+  std::array<double, NS> molarFractions;
+  double totalMoles = 0.0;
+  for (int i = 0; i < NS; ++i) {
+      totalMoles += rhosM[i] / Sptr[i].MW;
   }
-  else
+  for (int i = 0; i < NS; ++i) {
+      XsM[i] = (rhosM[i] / Sptr[i].MW) / totalMoles;
+  }
+
+  for(int i=0;i<NS;i++)
   {
-    printf("Species diffusion type %d is not supported.\n", AMRPara::species_diffusion_type);
-    exit(EXIT_FAILURE);
+    if(XsM[i] > 1e-15)
+    {
+      JAX[i] = - DC[i]*(drdx[i] - YsM[i]*drhoMixdx) - rhosM[i]*DC[i]/XsM[i]*(XsM[i]-YsM[i])*dPdx/P_face;
+      JA += JAX[i];
+    }
+    else
+    {
+      JAX[i] = 0.0; // avoid division by zero
+    }
+    for(int i=0;i<NS;i++)JSX[i] = JAX[i] - YsM[i]*JA;
   }
   
 	//Writing of viscous terms on each equation of fluxBuffFire
