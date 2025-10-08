@@ -144,7 +144,7 @@ This will generate binary-format .vtu files that are fully compatible with ParaV
 - Green: Cantera integrations
 
 ### Simulation Workflow
-![Fire_flow_chart_simple](figures/Fire_flow_chart_simple.png "The process and key functions called for advancing one time step at level *lvl* (*lvl < L*, non-finest AMR layer) in Fire.")
+![Fire_flow_chart_simple](figures/Fire_flow_chart.jpg "The process and key functions called for advancing one time step at level *lvl* (*lvl < L*, non-finest AMR layer) in Fire.")
 
 
 
@@ -159,3 +159,27 @@ Fire-Specific Customizations (Red Highlights):
 
 **Acknowledgments**  
 This work builds upon the ECOGEN framework. Please cite both projects when using Fire in academic publications.
+
+Fan, E., Zhang, T., Hao, J., Wen, C. Y., & Shi, L. (2025). Fire: an open-source adaptive mesh refinement solver for supersonic reacting flows. *Computer Physics Communications*. [![DOI](https://img.shields.io/badge/DOI-10.1016/j.cpc.2025.109881-green.svg)](https://doi.org/10.1016/j.cpc.2025.109881)
+
+
+Schmidmayer, K., Petitpas, F., Le Martelot, S. & Daniel, E. (2020). ECOGEN, an open-source tool dedicated to multiphase compressible multiphysics flows. *Computer Physics Communications*. [![DOI](https://img.shields.io/badge/DOI-10.1016/j.cpc.2019.107093-green.svg)](https://doi.org/10.1016/j.cpc.2019.107093)
+
+```
+@article{fan2025fire,
+  title={Fire: an open-source adaptive mesh refinement solver for supersonic reacting flows},
+  author={Fan, E and Zhang, Tianhan and Hao, Jiaao and Wen, Chih-Yung and Shi, Lisong},
+  journal={Computer Physics Communications},
+  pages={109881},
+  year={2025},
+  publisher={Elsevier}
+}
+@article{schmidmayer2020ecogen,
+  title={{ECOGEN}: {A}n open-source tool for multiphase, compressible, multiphysics flows},
+  author={Schmidmayer, Kevin and Petitpas, Fabien and Le Martelot, S{\'e}bastien and Daniel, {\'E}ric},
+  journal={Computer Physics Communications},
+  volume={251},
+  pages={107093},
+  publisher={Elsevier}
+}
+```
